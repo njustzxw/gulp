@@ -1,0 +1,18 @@
+div {
+  width: 400px;
+  height: 200px;
+  margin: auto;
+  background-color: #2B2B2B;
+  color: #EEEEEE;
+  font-size: 16px;
+  font-family: Microsoft YaHei, sans-serif;
+  font-weight: bolder;
+  padding: 20px;
+}
+.time {
+  font-size: 28px;
+}
+a {
+  color: white;
+  text-decoration: none;
+}
