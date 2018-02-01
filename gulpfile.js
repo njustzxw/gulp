@@ -2,13 +2,14 @@
 var gulp = require('gulp'), //本地安装gulp所用到的地方
     less = require('gulp-less'),
     minify = require('gulp-minify'),
+    cssminify = require('gulp-minify-css'),
     uglify = require('gulp-uglify'),
     connect = require('gulp-connect'), //livereload
     livereload = require('gulp-livereload'),
-    cssminify = require('gulp-minify-css')
-var browserSync = require('browser-sync').create(); // 静态服务器
-var reload = browserSync.reload;
-
+    runSequence = require('run-sequence'),
+    del = require('del'),
+    browserSync = require('browser-sync').create(), // 静态服务器
+    reload = browserSync.reload;
 
 //定义一个testLess任务（自定义任务名称）
 gulp.task('testLess', function() {
@@ -43,27 +44,19 @@ gulp.task('connect', function() {
         livereload: true
     });
 });
-
-gulp.task('browser-sync', function() {
-    var files = [
-        'pages/*.html',
-        'css/*.css',
-        'js/*.js'
-    ];
+// 清空输出目录
+gulp.task('clean', () => del(['.tmp', 'dist/*', '!dist/.git'], {
+    dot: true
+}));
+//浏览器实时刷新
+gulp.task('browser-sync', ['default'], () => {
     browserSync.init({
         server: {
             baseDir: "dist",
         },
         port: 8080
     });
-});
-//gulp.task(name[, deps], fn) 定义任务  name：任务名称 deps：依赖任务名称 fn：回调函数
-//gulp.src(globs[, options]) 执行任务处理的文件  globs：处理的文件路径(字符串或者字符串数组) 
-//gulp.dest(path[, options]) 处理完后文件生成路径
-
-//定义看守任务
-gulp.task('watch', function() {
-    livereload.listen();
+    //定义看守任务
     gulp.watch('src/less/*.less', ['testLess']);
     gulp.watch('src/js/*.js', ['testjs']);
     gulp.watch('src/css/*.css', ['testCss']);
@@ -71,6 +64,10 @@ gulp.task('watch', function() {
     gulp.watch('src/*.html', ['testhtml']);
     gulp.watch(['src/less/*.less', 'src/js/*.js', 'src/css/*.css', 'src/pages/*.html', 'src/*.html'], reload);
 });
-
 //定义默认任务
-gulp.task('default', ['testLess', 'testjs', 'testhtml', 'testCss', 'watch', 'browser-sync', 'connect']);
+gulp.task('default', ['clean'], cb =>
+    runSequence(
+        ['testLess', 'testjs', 'testhtml', 'testCss'], // 第二步：打包 
+        cb
+    )
+);
